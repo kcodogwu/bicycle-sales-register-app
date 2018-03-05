@@ -191,11 +191,11 @@ public class Sale  extends JInternalFrame implements ActionListener {
 			// Load the JConnector Driver
 			Class.forName("com.mysql.jdbc.Driver");
 			// Specify the DB Name
-			String url="jdbc:mysql://localhost:3306/BEng_Assign?useSSL=no";
+			//String url="jdbc:mysql://localhost:3306/BEng_Assign?useSSL=no";
 			// Connect to DB using DB URL, Username and password
-			con = DriverManager.getConnection(url, "root", "#880854585kCo#0");
+			//con = DriverManager.getConnection(url, "root", "#880854585kCo#0");
 			//Create a generic statement which is passed to the TestInternalFrame1
-			stmt = con.createStatement();
+			//stmt = con.createStatement();
 		}
 		catch(Exception e)
 		{

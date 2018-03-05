@@ -18,6 +18,6 @@ public class MySQLAccessLayer {
 		Class.forName("com.mysql.jdbc.Driver");
 		String url="jdbc:mysql://localhost:3306/newspaper_delivery_system?useSSL=no";
 		
-		con = DriverManager.getConnection(url, "root", "#880854585kCo#0");
+		con = DriverManager.getConnection(url, "root", "<a password>");
 	}
 }

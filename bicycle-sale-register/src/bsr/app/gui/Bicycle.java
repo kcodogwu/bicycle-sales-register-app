@@ -43,24 +43,16 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 	private Border lineBorder;
 
 	private JLabel IDLabel=new JLabel("ID:                 ");
-	private JLabel FirstNameLabel=new JLabel("FirstName:               ");
-	private JLabel LastNameLabel=new JLabel("LastName:      ");
-	private JLabel AgeLabel=new JLabel("Age:        ");
-	private JLabel GenderLabel=new JLabel("Gender:                 ");
-	private JLabel PositionLabel=new JLabel("Position:               ");
-	private JLabel DepartmentLabel=new JLabel("Department:      ");
-	private JLabel RateLabel=new JLabel("Rate:      ");
-	private JLabel HoursLabel=new JLabel("Hours:        ");
+	private JLabel BrandNameLabel=new JLabel("Brand name:               ");
+	private JLabel ModelNameLabel=new JLabel("Model name:      ");
+	private JLabel CostLabel=new JLabel("Cost:");
+	private JLabel QuantityLabel=new JLabel("Quantity in stock:        ");
 
 	private JTextField IDTF= new JTextField(10);
 	private JTextField FirstNameTF=new JTextField(10);
 	private JTextField LastNameTF=new JTextField(10);
 	private JTextField AgeTF=new JTextField(10);
 	private JTextField GenderTF=new JTextField(10);
-	private JTextField PositionTF=new JTextField(10);
-	private JTextField DepartmentTF=new JTextField(10);
-	private JTextField RateTF=new JTextField(10);
-	private JTextField HoursTF=new JTextField(10);
 
 
 	private static QueryTableModel TableModel = new QueryTableModel();
@@ -99,26 +91,18 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 		detailsPanel=new JPanel();
 		detailsPanel.setLayout(new GridLayout(11,2));
 		detailsPanel.setBackground(Color.lightGray);
-		detailsPanel.setBorder(BorderFactory.createTitledBorder(lineBorder, "CRUD Actions"));
+		detailsPanel.setBorder(BorderFactory.createTitledBorder(lineBorder, "Bicycle Details"));
 
 		detailsPanel.add(IDLabel);			
 		detailsPanel.add(IDTF);
-		detailsPanel.add(FirstNameLabel);		
+		detailsPanel.add(BrandNameLabel);		
 		detailsPanel.add(FirstNameTF);
-		detailsPanel.add(LastNameLabel);		
+		detailsPanel.add(ModelNameLabel);		
 		detailsPanel.add(LastNameTF);
-		detailsPanel.add(AgeLabel);	
+		detailsPanel.add(CostLabel);	
 		detailsPanel.add(AgeTF);
-		detailsPanel.add(GenderLabel);		
+		detailsPanel.add(QuantityLabel);		
 		detailsPanel.add(GenderTF);
-		detailsPanel.add(PositionLabel);
-		detailsPanel.add(PositionTF);
-		detailsPanel.add(DepartmentLabel);
-		detailsPanel.add(DepartmentTF);
-		detailsPanel.add(RateLabel);
-		detailsPanel.add(RateTF);
-		detailsPanel.add(HoursLabel);
-		detailsPanel.add(HoursTF);
 
 		//setup details panel and add the components to it
 		exportButtonPanel=new JPanel();
@@ -191,11 +175,11 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 			// Load the JConnector Driver
 			Class.forName("com.mysql.jdbc.Driver");
 			// Specify the DB Name
-			String url="jdbc:mysql://localhost:3306/BEng_Assign?useSSL=no";
+			//String url="jdbc:mysql://localhost:3306/BEng_Assign?useSSL=no";
 			// Connect to DB using DB URL, Username and password
-			con = DriverManager.getConnection(url, "root", "#880854585kCo#0");
+			//con = DriverManager.getConnection(url, "root", "#880854585kCo#0");
 			//Create a generic statement which is passed to the TestInternalFrame1
-			stmt = con.createStatement();
+			//stmt = con.createStatement();
 		}
 		catch(Exception e)
 		{
@@ -214,11 +198,6 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 			LastNameTF.setText("");
 			AgeTF.setText("");
 			GenderTF.setText("");
-			PositionTF.setText("");
-			DepartmentTF.setText("");
-			RateTF.setText("");
-			HoursTF.setText("");
-
 		}
 
 		if (target == insertButton)
@@ -226,8 +205,7 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 			try
 			{
 				String updateTemp ="INSERT INTO details VALUES("+
-				null +",'"+FirstNameTF.getText()+"','"+LastNameTF.getText()+"',"+AgeTF.getText()+",'"+GenderTF.getText()+"','"
-				+PositionTF.getText()+"','"+DepartmentTF.getText()+"',"+RateTF.getText()+","+HoursTF.getText()+");";
+				null +",'"+FirstNameTF.getText()+"','"+LastNameTF.getText()+"',"+AgeTF.getText()+",'"+GenderTF.getText()+");";
 
 				stmt.executeUpdate(updateTemp);
 
@@ -268,10 +246,6 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 				"', lastName = '"+LastNameTF.getText()+
 				"', age = "+AgeTF.getText()+
 				", gender ='"+GenderTF.getText()+
-				"', position = '"+PositionTF.getText()+
-				"', department = '"+DepartmentTF.getText()+
-				"', rate = "+RateTF.getText()+
-				", hours = "+HoursTF.getText()+
 				" where id = "+IDTF.getText();
 
 
