@@ -24,16 +24,19 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
+import bsr.app.db.sql.MySQLAccessLayer;
+
 @SuppressWarnings("serial")
-public class Bicycle  extends JInternalFrame implements ActionListener {	
+public class Bicycle  extends JPanel implements ActionListener {	
 	String cmd = null;
 
 	// DB Connectivity Attributes
+	private MySQLAccessLayer db;
 	private Connection con = null;
 	private Statement stmt = null;
 	private ResultSet rs = null;
 
-	private Container content;
+	//private Container content;
 
 	private JPanel detailsPanel;
 	private JPanel exportButtonPanel;
@@ -49,15 +52,15 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 	private JLabel QuantityLabel=new JLabel("Quantity in stock:        ");
 
 	private JTextField IDTF= new JTextField(10);
-	private JTextField FirstNameTF=new JTextField(10);
-	private JTextField LastNameTF=new JTextField(10);
-	private JTextField AgeTF=new JTextField(10);
-	private JTextField GenderTF=new JTextField(10);
+	private JTextField BrandNameTF=new JTextField(10);
+	private JTextField ModelNameTF=new JTextField(10);
+	private JTextField CostTF=new JTextField(10);
+	private JTextField QuantityTF=new JTextField(10);
 
 
-	private static QueryTableModel TableModel = new QueryTableModel();
+	private static BicyclesQueryTableModel TableModel;
 	//Add the models to JTabels
-	private JTable TableofDBContents=new JTable(TableModel);
+	private JTable TableofDBContents;
 	//Buttons for inserting, and updating members
 	//also a clear button to clear details panel
 	private JButton updateButton = new JButton("Update");
@@ -66,25 +69,31 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 	private JButton deleteButton  = new JButton("Delete");
 	private JButton clearButton  = new JButton("Clear");
 
-	private JButton  NumLectures = new JButton("NumLecturesForDepartment:");
-	private JTextField NumLecturesTF  = new JTextField(12);
-	private JButton avgAgeDepartment  = new JButton("AvgAgeForDepartment");
-	private JTextField avgAgeDepartmentTF  = new JTextField(12);
-	private JButton ListAllDepartments  = new JButton("ListAllDepartments");
-	private JButton ListAllPositions  = new JButton("ListAllPositions");
+	private JButton  NumberOfBicyclesForBrandButton = new JButton("No. of Bicycles for Brand:");
+	private JTextField NumOfBicyclesForBrandTF  = new JTextField(12);
+	private JButton AverageCostOfBicycleForBrandButton  = new JButton("Avg. Cost of Bicycle For Brand:");
+	private JTextField AvgCostOfBicyclesForBrandTF  = new JTextField(12);
+	private JButton ListAllBicycleBrandsButton  = new JButton("List All Bicycle Brands");
+	private JButton ListAllBicycleModelsButton  = new JButton("List All Bicycle Models");
 
 
 
-	public Bicycle(String aTitle) {	
+	public Bicycle(String aTitle, MySQLAccessLayer mysqlAL) {	
 		//setting up the GUI
-		super(aTitle, false,false,false,false);
+		//super(aTitle, false,false,false,false);
+		super();
+		db = mysqlAL;
+		TableModel = new BicyclesQueryTableModel(db);
+		TableofDBContents=new JTable(TableModel);
 		setEnabled(true);
 
-		initiate_db_conn();
+		//initiate_db_conn();
 		//add the 'main' panel to the Internal Frame
-		content=getContentPane();
-		content.setLayout(null);
-		content.setBackground(Color.lightGray);
+		//content=getContentPane();
+		//content.setLayout(null);
+		//content.setBackground(Color.lightGray);
+		this.setLayout(null);
+		this.setBackground(Color.lightGray);
 		lineBorder = BorderFactory.createEtchedBorder(15, Color.red, Color.black);
 
 		//setup details panel and add the components to it
@@ -96,28 +105,29 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 		detailsPanel.add(IDLabel);			
 		detailsPanel.add(IDTF);
 		detailsPanel.add(BrandNameLabel);		
-		detailsPanel.add(FirstNameTF);
+		detailsPanel.add(BrandNameTF);
 		detailsPanel.add(ModelNameLabel);		
-		detailsPanel.add(LastNameTF);
+		detailsPanel.add(ModelNameTF);
 		detailsPanel.add(CostLabel);	
-		detailsPanel.add(AgeTF);
+		detailsPanel.add(CostTF);
 		detailsPanel.add(QuantityLabel);		
-		detailsPanel.add(GenderTF);
+		detailsPanel.add(QuantityTF);
 
 		//setup details panel and add the components to it
 		exportButtonPanel=new JPanel();
 		exportButtonPanel.setLayout(new GridLayout(3,2));
 		exportButtonPanel.setBackground(Color.lightGray);
 		exportButtonPanel.setBorder(BorderFactory.createTitledBorder(lineBorder, "Export Data"));
-		exportButtonPanel.add(NumLectures);
-		exportButtonPanel.add(NumLecturesTF);
-		exportButtonPanel.add(avgAgeDepartment);
-		exportButtonPanel.add(avgAgeDepartmentTF);
-		exportButtonPanel.add(ListAllDepartments);
-		exportButtonPanel.add(ListAllPositions);
+		exportButtonPanel.add(NumberOfBicyclesForBrandButton);
+		exportButtonPanel.add(NumOfBicyclesForBrandTF);
+		exportButtonPanel.add(AverageCostOfBicycleForBrandButton);
+		exportButtonPanel.add(AvgCostOfBicyclesForBrandTF);
+		exportButtonPanel.add(ListAllBicycleBrandsButton);
+		exportButtonPanel.add(ListAllBicycleModelsButton);
 		exportButtonPanel.setSize(500, 200);
 		exportButtonPanel.setLocation(3, 300);
-		content.add(exportButtonPanel);
+		//content.add(exportButtonPanel);
+		this.add(exportButtonPanel);
 
 		insertButton.setSize(100, 30);
 		updateButton.setSize(100, 30);
@@ -137,15 +147,22 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 		deleteButton.addActionListener(this);
 		clearButton.addActionListener(this);
 
-		this.ListAllDepartments.addActionListener(this);
-		this.NumLectures.addActionListener(this);
+		this.ListAllBicycleBrandsButton.addActionListener(this);
+		this.ListAllBicycleModelsButton.addActionListener(this);
+		this.NumberOfBicyclesForBrandButton.addActionListener(this);
+		this.AverageCostOfBicycleForBrandButton.addActionListener(this);
 
 
-		content.add(insertButton);
-		content.add(updateButton);
-		content.add(exportButton);
-		content.add(deleteButton);
-		content.add(clearButton);
+		//content.add(insertButton);
+		//content.add(updateButton);
+		//content.add(exportButton);
+		//content.add(deleteButton);
+		//content.add(clearButton);
+		this.add(insertButton);
+		this.add(updateButton);
+		this.add(exportButton);
+		this.add(deleteButton);
+		this.add(clearButton);
 
 
 		TableofDBContents.setPreferredScrollableViewportSize(new Dimension(900, 300));
@@ -159,107 +176,106 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 		dbContentsPanel.setSize(700, 300);
 		dbContentsPanel.setLocation(477, 0);
 
-		content.add(detailsPanel);
-		content.add(dbContentsPanel);
+		//content.add(detailsPanel);
+		//content.add(dbContentsPanel);
+		this.add(detailsPanel);
+		this.add(dbContentsPanel);
 
 		setSize(982,645);
 		setVisible(true);
 
-		TableModel.refreshFromDB(stmt);
+		TableModel.refreshFromDB();
 	}
 
-	public void initiate_db_conn()
-	{
-		try
-		{
-			// Load the JConnector Driver
-			Class.forName("com.mysql.jdbc.Driver");
-			// Specify the DB Name
-			//String url="jdbc:mysql://localhost:3306/BEng_Assign?useSSL=no";
-			// Connect to DB using DB URL, Username and password
-			//con = DriverManager.getConnection(url, "root", "#880854585kCo#0");
-			//Create a generic statement which is passed to the TestInternalFrame1
-			//stmt = con.createStatement();
-		}
-		catch(Exception e)
-		{
-			System.out.println("Error: Failed to connect to database\n"+e.getMessage());
-		}
+	public void clearTFs() {
+		IDTF.setText("");
+		BrandNameTF.setText("");
+		ModelNameTF.setText("");
+		CostTF.setText("");
+		QuantityTF.setText("");
+		NumOfBicyclesForBrandTF.setText("");
+		AvgCostOfBicyclesForBrandTF.setText("");
 	}
-
+	
+	public void refreshData() {
+		TableModel.refreshFromDB();
+	}
+	
 	//event handling 
-	public void actionPerformed(ActionEvent e)
-	{
+	public void actionPerformed(ActionEvent e) {
 		Object target=e.getSource();
-		if (target == clearButton)
-		{
-			IDTF.setText("");
-			FirstNameTF.setText("");
-			LastNameTF.setText("");
-			AgeTF.setText("");
-			GenderTF.setText("");
+		boolean result = false;
+		
+		if (target == clearButton) {
+			clearTFs();
+		}
+		
+		if (target == exportButton) {
+			try {	
+				writeToFile(db.getBicycles());
+			} catch(Exception e1) {
+				System.err.println("Error with listing all bicycles.");
+				e1.printStackTrace();
+			}
 		}
 
-		if (target == insertButton)
-		{		 
-			try
-			{
-				String updateTemp ="INSERT INTO details VALUES("+
-				null +",'"+FirstNameTF.getText()+"','"+LastNameTF.getText()+"',"+AgeTF.getText()+",'"+GenderTF.getText()+");";
-
-				stmt.executeUpdate(updateTemp);
-
-			}
-			catch (SQLException sqle)
-			{
-				System.err.println("Error with  insert:\n"+sqle.toString());
-			}
-			finally
-			{
-				TableModel.refreshFromDB(stmt);
-			}
-		}
-		if (target == deleteButton)
-		{
-
-			try
-			{
-				String updateTemp ="DELETE FROM details WHERE id = "+IDTF.getText()+";"; 
-				stmt.executeUpdate(updateTemp);
-
-			}
-			catch (SQLException sqle)
-			{
-				System.err.println("Error with delete:\n"+sqle.toString());
-			}
-			finally
-			{
-				TableModel.refreshFromDB(stmt);
+		if (target == insertButton) {		 
+			try {
+				result = db.addBicycle(
+					BrandNameTF.getText(), 
+					ModelNameTF.getText(), 
+					Double.parseDouble(CostTF.getText()), 
+					Integer.parseInt(QuantityTF.getText())
+				);
+				
+				if (result) {
+					clearTFs();
+				}
+			} catch (SQLException sqle) {
+				System.err.println("Error with bicycle insert.");
+				sqle.printStackTrace();
+			} finally {
+				TableModel.refreshFromDB();
 			}
 		}
-		if (target == updateButton)
-		{	 	
-			try
-			{ 			
-				String updateTemp ="UPDATE details SET " +
-				"firstName = '"+FirstNameTF.getText()+
-				"', lastName = '"+LastNameTF.getText()+
-				"', age = "+AgeTF.getText()+
-				", gender ='"+GenderTF.getText()+
-				" where id = "+IDTF.getText();
-
-
-				stmt.executeUpdate(updateTemp);
-				//these lines do nothing but the table updates when we access the db.
-				rs = stmt.executeQuery("SELECT * from details ");
-				rs.next();
-				rs.close();	
+		
+		if (target == deleteButton) {
+			if (!IDTF.getText().equals("")) {
+				try {
+					result = db.deleteBicycle(Integer.parseInt(IDTF.getText()));
+					
+					if (result) {
+						clearTFs();
+					}
+				} catch (SQLException sqle) {
+					System.err.println("Error with bicycle delete.");
+					sqle.printStackTrace();
+				} finally {
+					TableModel.refreshFromDB();
+				}
 			}
-			catch (SQLException sqle){
-				System.err.println("Error with  update:\n"+sqle.toString());
-			}
-			finally{
-				TableModel.refreshFromDB(stmt);
+		}
+		
+		if (target == updateButton) {	 
+			if (!IDTF.getText().equals("")) {
+				try { 			
+					result = db.editBicycle(
+					  Integer.parseInt(IDTF.getText()), 
+					  BrandNameTF.getText(),
+					  ModelNameTF.getText(), 
+					  Double.parseDouble(CostTF.getText()), 
+					  Integer.parseInt(QuantityTF.getText())
+				  );
+					
+					if (result) {
+						clearTFs();
+					}
+				} catch (SQLException sqle) {
+					System.err.println("Error with bicycle update.");
+					sqle.printStackTrace();
+				} finally{
+					TableModel.refreshFromDB();
+				}
 			}
 		}
 
@@ -267,39 +283,54 @@ public class Bicycle  extends JInternalFrame implements ActionListener {
 		//I have only added functionality of 2 of the button on the lower right of the template
 		///////////////////////////////////////////////////////////////////////////////////
 
-		if(target == this.ListAllDepartments){
-
-			cmd = "select distinct department from details;";
-
-			try{					
-				rs= stmt.executeQuery(cmd); 	
-				writeToFile(rs);
+		if (target == this.ListAllBicycleBrandsButton) {
+			try {	
+				writeToFile(db.getAllActiveBicycleBrands());
+			} catch(Exception e1) {
+				System.err.println("Error with listing all bicycle brands.");
+				e1.printStackTrace();
 			}
-			catch(Exception e1){e1.printStackTrace();}
-
+		}
+		
+		if (target == this.ListAllBicycleModelsButton) {
+			try {	
+				writeToFile(db.getAllBicycleModels());
+			} catch(Exception e1) {
+				System.err.println("Error with listing all bicycle brands.");
+				e1.printStackTrace();
+			}
 		}
 
-		if(target == this.NumLectures){
-			String deptName = this.NumLecturesTF.getText();
-
-			cmd = "select department, count(*) "+  "from details " + "where department = '"  +deptName+"';";
-
-			System.out.println(cmd);
-			try{					
-				rs= stmt.executeQuery(cmd); 	
-				writeToFile(rs);
+		if (target == this.NumberOfBicyclesForBrandButton) {
+			if (!NumOfBicyclesForBrandTF.getText().equals("")) {
+				try{ 	
+					writeToFile(db.getNumberOfBicyclesForBrand(NumOfBicyclesForBrandTF.getText()));
+					clearTFs();
+				} catch(Exception e1) {
+					System.err.println("Error with listing the number of bicycle for the brand.");
+					e1.printStackTrace();
+				}
 			}
-			catch(Exception e1){e1.printStackTrace();}
-
 		} 
 
+		if (target == this.AverageCostOfBicycleForBrandButton) {
+			if (!AvgCostOfBicyclesForBrandTF.getText().equals("")) {
+				try{ 	
+					writeToFile(db.getAverageCostOfBicyclesForBrand(AvgCostOfBicyclesForBrandTF.getText()));
+					clearTFs();
+				} catch(Exception e1) {
+					System.err.println("Error with listing the average cost of bicycle for the brand.");
+					e1.printStackTrace();
+				}
+			}
+		}
 	}
 	///////////////////////////////////////////////////////////////////////////
 
 	private void writeToFile(ResultSet rs){
 		try{
 			System.out.println("In writeToFile");
-			FileWriter outputFile = new FileWriter("Sheila.csv");
+			FileWriter outputFile = new FileWriter("bicycle-export.csv");
 			PrintWriter printWriter = new PrintWriter(outputFile);
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int numColumns = rsmd.getColumnCount();

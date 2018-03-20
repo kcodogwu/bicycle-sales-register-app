@@ -7,18 +7,21 @@ import java.sql.Statement;
 import java.util.Vector;
 import javax.swing.table.AbstractTableModel;
 
+import bsr.app.db.sql.MySQLAccessLayer;
+
 @SuppressWarnings("serial")
-class QueryTableModel extends AbstractTableModel {
+class BicyclesQueryTableModel extends AbstractTableModel {
 	Vector modelData; //will hold String[] objects
 	int colCount;
 	String[] headers = new String[0];
 	Connection con;
-	Statement stmt = null;
 	String[] record;
 	ResultSet rs = null;
+	MySQLAccessLayer db;
 
-	public QueryTableModel() {
+	public BicyclesQueryTableModel(MySQLAccessLayer mysqlAL) {
 		modelData = new Vector();
+		db = mysqlAL;
 	} // end constructor QueryTableModel
 
 	public String getColumnName(int i) {
@@ -37,7 +40,7 @@ class QueryTableModel extends AbstractTableModel {
 		return ((String[])modelData.elementAt(row))[col];
 	}
 
-	public void refreshFromDB(Statement stmt1) {
+	public void refreshFromDB() {
 		//modelData is the data stored by the table
 		//when set query is called the data from the 
 		//DB is queried using �SELECT * FROM myInfo� 
@@ -46,11 +49,10 @@ class QueryTableModel extends AbstractTableModel {
 		//called the DB is queried and a new 
 		//modelData is created  
 		modelData = new Vector();
-		stmt = stmt1;
 		
 		try {
 			//Execute the query and store the result set and its metadata
-			rs = stmt.executeQuery("SELECT * FROM details");
+			rs = db.getBicycles();
 			ResultSetMetaData meta = rs.getMetaData();
 		
 			//to get the number of columns
@@ -59,7 +61,7 @@ class QueryTableModel extends AbstractTableModel {
 			headers = new String[colCount];
 	
 			for(int h = 0; h < colCount; h++) {
-				headers[h] = meta.getColumnName(h+1);
+				headers[h] = meta.getColumnLabel(h+1);
 			}//end for loop
 		
 			// fill the cache with the records from the query, ie get all the rows
