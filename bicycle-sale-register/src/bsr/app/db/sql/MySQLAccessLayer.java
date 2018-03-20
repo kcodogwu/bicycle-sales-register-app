@@ -32,7 +32,7 @@ public class MySQLAccessLayer {
 		Class.forName("com.mysql.jdbc.Driver");
 		String url="jdbc:mysql://localhost:3306/bicycle_sale_register?useSSL=no";
 		
-		con = DriverManager.getConnection(url, "root", "#880854585kCo#0");
+		con = DriverManager.getConnection(url, "[ user ]", "[ password ]");
 	}
 	
 	public ResultSet getBicycles() throws SQLException {
